@@ -1,0 +1,122 @@
+##### 1.hooks
+
+- useState
+
+  - ```js
+    每一次渲染都有它自己的 Props 和 State
+    每一次渲染都有它自己的事件处理函数
+    当点击更新状态的时候，函数组件都会重新被调用，那么每次渲染都是独立的，取到的值不会受后面操作的影响
+    function Counter2(){
+      let [number,setNumber] = useState(0);
+      function alertNumber(){
+        setTimeout(()=>{
+          // alert 只能获取到点击按钮时的那个状态
+          alert(number);
+        },3000);
+      }
+      return (
+          <>
+              <p>{number}</p>
+              <button onClick={()=>setNumber(number+1)}>+</button>
+              <button onClick={alertNumber}>alertNumber</button>
+          </>
+      )
+    }
+    
+    ```
+
+  - ```js
+    如果新的 state 需要通过使用先前的 state 计算得出，那么可以将回调函数当做参数传递给 setState。该回调函数将接收先前的 state，并返回一个更新后的
+    function Counter(){
+        let [number,setNumber] = useState(0);
+        function lazy(){
+            setTimeout(() => {
+                // setNumber(number+1);
+                // 这样每次执行时都会去获取一遍 state，而不是使用点击触发时的那个 state
+                setNumber(number=>number+1);
+            }, 3000);
+        }
+        return (
+            <>
+               <p>{number}</p>
+               <button onClick={()=>setNumber(number+1)}>+</button>
+               <button onClick={lazy}>lazy</button>
+            </>
+        )
+    }
+    值。
+    function Counter(){
+        let [number,setNumber] = useState(0);
+        function lazy(){
+            setTimeout(() => {
+                // setNumber(number+1);
+                // 这样每次执行时都会去获取一遍 state，而不是使用点击触发时的那个 state
+                setNumber(number=>number+1);
+            }, 3000);
+        }
+        return (
+            <>
+               <p>{number}</p>
+               <button onClick={()=>setNumber(number+1)}>+</button>
+               <button onClick={lazy}>lazy</button>
+            </>
+        )
+    }
+    
+    ```
+
+  - ```js
+    initialState 参数只会在组件的初始化渲染中起作用，后续渲染时会被忽略
+    如果初始 state 需要通过复杂计算获得，则可以传入一个函数，在函数中计算并返回初始的 state，此函数只在初始渲染时被调用
+    function Counter5](props){
+        // 这个函数只在初始渲染时执行一次，后续更新状态重新渲染组件时，该函数就不会再被调用
+        function getInitState(){
+            console.log('render');
+            return {number:props.number};
+        }
+        let [counter,setCounter] = useState(getInitState);
+        return (
+            <>
+               <p>{counter.number}</p>
+               <button onClick={()=>setCounter({number:counter.number+1})}>+</button>
+               <button onClick={()=>setCounter(counter)}>setCounter</button>
+            </>
+        )
+    }
+    
+    ```
+
+  - 
+
+- useMemo&useCallback
+
+  - ```js
+    function SubCounter ({ data, onClick }) {
+      console.log('sub  render');
+      return <span onClick={onClick}>{data}</span>
+    }
+    
+    SubCounter = memo(SubCounter);
+    
+    function Counter () {
+      console.log('count render');
+      const [name, setName] = useState('dddd')
+      const [number, setNumber] = useState(0)
+      // eslint-disable-next-line no-unused-expressions
+        // 父组件更新时，这里的变量和函数每次都会重新创建，那么子组件接受到的属性每次都会认为是新的
+        // 所以子组件也会随之更新，这时候可以用到 useMemo
+        // 有没有后面的依赖项数组很重要，否则还是会重新渲染
+        // 如果后面的依赖项数组没有值的话，即使父组件的 number 值改变了，子组件也不会去更新
+      const memoNumber = useMemo(() => number, [number])
+      const addClick = useCallback(() => {
+        setNumber(number + 1);
+      }, [number])
+    
+      return <>
+        <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+        <SubCounter data={memoNumber} onClick={addClick} />
+      </>
+    }
+    ```
+
+  - 
